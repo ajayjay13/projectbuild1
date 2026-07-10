@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hyderabad Restaurant Hygiene Map</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<style>
+  html, body, #map { height: 100%; margin: 0; }
+  body { font-family: sans-serif; }
+  #panel {
+    position: absolute; top: 10px; right: 10px; z-index: 1000;
+    background: #fff; padding: 10px 14px; border-radius: 8px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.3); font-size: 14px;
+  }
+  #panel button { display: block; margin-top: 6px; width: 100%; }
+  .score-badge { font-weight: bold; padding: 2px 6px; border-radius: 4px; color: #fff; }
+  .legend { position: absolute; bottom: 20px; left: 10px; z-index: 1000; background: #fff;
+    padding: 8px 12px; border-radius: 8px; box-shadow: 0 1px 4px rgba(0,0,0,0.3); font-size: 12px; }
+  .legend span { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 4px; }
+</style>
+</head>
+<body>
+<div id="map"></div>
+<div id="panel">
+  <strong>Hyderabad Hygiene Map</strong>
+  <button onclick="findNearMe()">Show restaurants near me</button>
+  <div id="status"></div>
+</div>
+<div class="legend">
+  <span style="background:#2ecc71"></span>70%+
+  <span style="background:#f39c12"></span>40-69%
+  <span style="background:#e74c3c"></span>&lt;40%
+  <span style="background:#95a5a6"></span>no score
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script>
+const map = L.map('map').setView([17.4400, 78.3489], 11); // Cyberabad-ish center
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  attribution: '&copy; OpenStreetMap contributors',
+  maxZoom: 19
+}).addTo(map);
+
+function colorForScore(score) {
+  if (score === null || score === undefined) return '#95a5a6';
+  if (score >= 70) return '#2ecc71';
+  if (score >= 40) return '#f39c12';
+  return '#e74c3c';
+}
+
+function latestInspection(props) {
+  return props.inspections[props.inspections.length - 1];
+}
+
+function popupHTML(props) {
+  const latest = latestInspection(props);
+  const brands = props.brands.map(b => `${b.name} (${b.platform})`).join(', ');
+  const good = latest.good_practices.map(g => `<li>${g}</li>`).join('') || '<li>None recorded</li>';
+  const bad = latest.violations.map(v => `<li>${v}</li>`).join('') || '<li>None recorded</li>';
+  const media = latest.media_urls.map(u => `<a href="${u}" target="_blank">media</a>`).join(', ');
+  const score = latest.score_percent !== null ? `${latest.score_percent}%` : 'not published';
+  return `
+    <strong>${props.primary_name}</strong><br>
+    ${props.kitchen_type === 'cloud_kitchen' ? '<em>Cloud kitchen — brands: ' + brands + '</em><br>' : ''}
+    <span class="score-badge" style="background:${colorForScore(latest.score_percent)}">${score}</span>
+    <div>Inspected: ${latest.date}</div>
+    <div><b>Good practices</b><ul>${good}</ul></div>
+    <div><b>Violations</b><ul>${bad}</ul></div>
+    <div>Action: ${latest.action_taken || 'none recorded'}</div>
+    <div>Source: <a href="${latest.source_url}" target="_blank">CMC post</a> ${media ? '· ' + media : ''}</div>
+  `;
+}
+
+let markers = [];
+
+fetch('inspections.geojson')
+  .then(r => r.json())
+  .then(data => {
+    L.geoJSON(data, {
+      pointToLayer: (feature, latlng) => {
+        const score = latestInspection(feature.properties).score_percent;
+        const m = L.circleMarker(latlng, {
+          radius: 8, fillColor: colorForScore(score), color: '#333',
+          weight: 1, fillOpacity: 0.9
+        });
+        m.bindPopup(popupHTML(feature.properties));
+        m._latlng0 = latlng;
+        markers.push(m);
+        return m;
+      }
+    }).addTo(map);
+  });
+
+function findNearMe() {
+  const status = document.getElementById('status');
+  if (!navigator.geolocation) {
+    status.textContent = 'Geolocation not supported.';
+    return;
+  }
+  status.textContent = 'Locating...';
+  navigator.geolocation.getCurrentPosition(pos => {
+    const here = L.latLng(pos.coords.latitude, pos.coords.longitude);
+    map.setView(here, 14);
+    L.marker(here).addTo(map).bindPopup('You are here').openPopup();
+    markers.sort((a, b) => here.distanceTo(a._latlng0) - here.distanceTo(b._latlng0));
+    status.textContent = `Nearest: ${markers[0] ? markers[0].getPopup().getContent().split('<br>')[0] : 'none'}`;
+  }, () => {
+    status.textContent = 'Could not get location.';
+  });
+}
+</script>
+</body>
+</html>

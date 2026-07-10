@@ -1,0 +1,94 @@
+name: New inspection report
+description: Add a CMC food safety inspection post to the map
+title: "[inspection] "
+labels: ["inspection", "needs-review"]
+body:
+  - type: dropdown
+    id: kitchen_type
+    attributes:
+      label: Establishment type
+      options:
+        - dedicated
+        - cloud_kitchen
+    validations:
+      required: true
+
+  - type: input
+    id: primary_name
+    attributes:
+      label: Establishment / firm name
+      description: The name on the CMC post, e.g. "Reddy Catering Services"
+    validations:
+      required: true
+
+  - type: input
+    id: brand_names
+    attributes:
+      label: Ordering-app brand name(s)
+      description: Comma-separated if a cloud kitchen serves multiple brands, e.g. "Shree Dwaraka Grand (Zomato), XYZ Biryani (Swiggy)"
+    validations:
+      required: false
+
+  - type: input
+    id: address
+    attributes:
+      label: Address / landmark
+      description: As written in the CMC post — used for geocoding
+    validations:
+      required: true
+
+  - type: input
+    id: date
+    attributes:
+      label: Inspection date
+      description: DD.MM.YYYY as shown in the post
+    validations:
+      required: true
+
+  - type: input
+    id: score
+    attributes:
+      label: Hygiene score (%)
+      description: Leave blank if CMC didn't publish a numeric score
+    validations:
+      required: false
+
+  - type: textarea
+    id: good_practices
+    attributes:
+      label: Good practices observed
+      description: One per line
+    validations:
+      required: false
+
+  - type: textarea
+    id: violations
+    attributes:
+      label: Violations / observations
+      description: One per line
+    validations:
+      required: false
+
+  - type: input
+    id: action_taken
+    attributes:
+      label: Action taken
+      description: e.g. "Improvement notice issued", "FSSAI licence suspended"
+    validations:
+      required: false
+
+  - type: input
+    id: source_url
+    attributes:
+      label: Source post URL
+      description: Link to the @CMC_Offcl post — required for verification
+    validations:
+      required: true
+
+  - type: input
+    id: media_urls
+    attributes:
+      label: Photo/video URLs
+      description: Comma-separated links to media in the source post (not re-uploaded, just linked)
+    validations:
+      required: false

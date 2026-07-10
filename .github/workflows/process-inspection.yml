@@ -1,0 +1,43 @@
+name: Process inspection report
+
+on:
+  issues:
+    types: [closed]
+
+jobs:
+  merge-data:
+    if: contains(github.event.issue.labels.*.name, 'verified')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      issues: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Parse and merge issue into dataset
+        env:
+          ISSUE_BODY: ${{ github.event.issue.body }}
+        run: python scripts/process_issue.py
+
+      - name: Commit updated data
+        run: |
+          git config user.name "hygiene-map-bot"
+          git config user.email "actions@github.com"
+          git add data/inspections.geojson data/geocode-cache.json
+          git diff --quiet --cached || git commit -m "Add inspection: ${{ github.event.issue.title }}"
+          git push
+
+      - name: Comment on issue
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: "Merged into the map dataset. It will appear on the site after the next Pages build."
+            })

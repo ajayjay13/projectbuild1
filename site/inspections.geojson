@@ -1,0 +1,67 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [78.3428, 17.4956] },
+      "properties": {
+        "id": "kitchen-001",
+        "kitchen_type": "dedicated",
+        "primary_name": "Am Aha Restaurant",
+        "brands": [
+          { "name": "Am Aha Restaurant", "platform": "dine-in" }
+        ],
+        "address": "Infinity Mall, Madinaguda, Hyderabad",
+        "area": "Madinaguda",
+        "inspections": [
+          {
+            "date": "2026-07-04",
+            "score_percent": 88,
+            "good_practices": [
+              "No visible pest infestation",
+              "Hot water sanitisation of utensils"
+            ],
+            "violations": [],
+            "action_taken": "None required",
+            "source_url": "https://x.com/CMC_Offcl/status/2075230699578155153",
+            "media_urls": [
+              "https://x.com/CMC_Offcl/status/2075230699578155153/photo/1"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [78.3915, 17.4874] },
+      "properties": {
+        "id": "kitchen-002",
+        "kitchen_type": "cloud_kitchen",
+        "primary_name": "Reddy Catering Services",
+        "brands": [
+          { "name": "Shree Dwaraka Grand", "platform": "Zomato" }
+        ],
+        "address": "Bagh Ameer, Kukatpally, Hyderabad",
+        "area": "Kukatpally",
+        "inspections": [
+          {
+            "date": "2026-07-08",
+            "score_percent": 41,
+            "good_practices": [],
+            "violations": [
+              "Cats found inside kitchen",
+              "Cockroach and fly infestation",
+              "Expired FSSAI licence",
+              "Utensils not sanitised in hot water"
+            ],
+            "action_taken": "Improvement notice issued",
+            "source_url": "https://x.com/CMC_Offcl/status/2075383747386716505",
+            "media_urls": [
+              "https://x.com/CMC_Offcl/status/2075383747386716505/photo/1"
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}
