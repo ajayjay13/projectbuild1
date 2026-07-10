@@ -7,6 +7,9 @@ on:
       - "data/**"
       - "site/**"
       - ".github/workflows/deploy-pages.yml"
+  workflow_run:
+    workflows: ["Process inspection report"]
+    types: [completed]
   workflow_dispatch:
 
 permissions:
@@ -20,12 +23,15 @@ concurrency:
 
 jobs:
   deploy:
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: main
 
       - name: Copy dataset into site
         run: cp data/inspections.geojson site/inspections.geojson
