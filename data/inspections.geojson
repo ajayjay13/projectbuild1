@@ -76,6 +76,60 @@
           }
         ]
       }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          78.3639649,
+          17.4532307
+        ]
+      },
+      "properties": {
+        "id": "zayaka-food-court",
+        "kitchen_type": "dedicated",
+        "primary_name": "Zayaka Food Court",
+        "brands": [
+          {
+            "name": "Zomato",
+            "platform": "unknown"
+          },
+          {
+            "name": "Swiggy",
+            "platform": "unknown"
+          }
+        ],
+        "address": "Golden Habitat, Near AMB Mall",
+        "area": "Near AMB Mall",
+        "google_maps_url": "https://maps.app.goo.gl/f8WRmoe1riF9q5V66",
+        "inspections": [
+          {
+            "date": "24.06.2026",
+            "score_raw": "25/100 Marks (25%)",
+            "score_percent": 25,
+            "good_practices": [
+              "✅ Good Practice",
+              "• Food handlers using hairnets"
+            ],
+            "violations": [
+              "⚠️ Major Observations",
+              "• Food stored in a non-functional freezer",
+              "• Rat infestation, rat burrows, and rodent damage to food packaging",
+              "• Rat droppings found in raw material and packaging storage areas",
+              "• Stale chicken biryani and spoiled vegetables stored in the freezer",
+              "• Improper segregation of food materials",
+              "• Egg mayonnaise stored under unsuitable conditions",
+              "• Medical fitness and pest control records not available"
+            ],
+            "action_taken": "🛠️ Action Taken • FSSAI License Suspended • Directions issued for immediate rectification of all food safety violations • FBO instructed not to operate the premises until re-inspection and revocation of the suspension",
+            "source_url": "https://x.com/CMC_Offcl/status/2069786153663009098?s=20",
+            "media_urls": [
+              "https://x.com/CMC_Offcl/status/2069786153663009098?s=20"
+            ]
+          }
+        ]
+      }
     }
   ]
 }
