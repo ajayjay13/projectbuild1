@@ -33,9 +33,18 @@ body:
     id: address
     attributes:
       label: Address / landmark
-      description: As written in the CMC post — used for geocoding
+      description: As written in the CMC post — used for geocoding if no Maps link is given below
     validations:
       required: true
+
+  - type: input
+    id: maps_url
+    attributes:
+      label: Google Maps link (optional, more accurate)
+      description: Paste the location link from Google Maps (share > copy link). Overrides the address field for pinpointing if provided.
+      placeholder: "https://maps.app.goo.gl/xxxx or https://www.google.com/maps/place/..."
+    validations:
+      required: false
 
   - type: input
     id: date

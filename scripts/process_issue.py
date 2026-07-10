@@ -51,6 +51,46 @@ def parse_issue_body(body: str) -> dict:
     return fields
 
 
+def resolve_short_url(url: str) -> str:
+    """Follow redirects on maps.app.goo.gl / goo.gl links to get the full URL."""
+    try:
+        req = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
+        with urllib.request.urlopen(req, timeout=10) as resp:
+            return resp.geturl()
+    except Exception as e:
+        print(f"::warning::Could not resolve short Maps link '{url}': {e}")
+        return url
+
+
+def extract_coords_from_maps_url(url: str) -> tuple[float, float] | None:
+    """
+    Returns (lon, lat) if the URL contains recoverable coordinates, else None.
+    Handles the two common Google Maps URL shapes:
+      - .../@17.4356,78.4483,17z/...        (viewport center)
+      - .../!3d17.4356!4d78.4483            (exact pin, place URLs)
+      - ...?q=17.4356,78.4483               (plain query)
+    Short links (maps.app.goo.gl, goo.gl/maps) are resolved to their full
+    form first since coordinates aren't present in the short form itself.
+    """
+    if not url:
+        return None
+    if "maps.app.goo.gl" in url or "goo.gl/maps" in url:
+        url = resolve_short_url(url)
+
+    for pattern in (
+        r"!3d(-?\d+\.\d+)!4d(-?\d+\.\d+)",
+        r"@(-?\d+\.\d+),(-?\d+\.\d+)",
+        r"[?&]q=(-?\d+\.\d+),(-?\d+\.\d+)",
+    ):
+        m = re.search(pattern, url)
+        if m:
+            lat, lon = float(m.group(1)), float(m.group(2))
+            return (lon, lat)
+
+    print(f"::warning::Could not extract coordinates from Maps link '{url}', falling back to address")
+    return None
+
+
 def geocode(address: str, cache: dict) -> tuple[float, float] | None:
     if address in cache:
         return tuple(cache[address])
@@ -109,10 +149,13 @@ def main():
     geo = load_json(DATA_PATH, {"type": "FeatureCollection", "features": []})
     cache = load_json(CACHE_PATH, {})
 
-    coords = geocode(address, cache)
-    save_json(CACHE_PATH, cache)
+    maps_url = fields.get("Google Maps link (optional, more accurate)", "").strip()
+    coords = extract_coords_from_maps_url(maps_url)
     if coords is None:
-        print("::error::Could not geocode address, skipping. Add lat/lon manually.")
+        coords = geocode(address, cache)
+        save_json(CACHE_PATH, cache)
+    if coords is None:
+        print("::error::Could not determine coordinates from Maps link or address, skipping. Add lat/lon manually.")
         sys.exit(1)
 
     kitchen_id = slugify(primary_name)
