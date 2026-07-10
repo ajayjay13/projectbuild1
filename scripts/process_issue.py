@@ -19,7 +19,7 @@ import urllib.request
 DATA_PATH = "data/inspections.geojson"
 CACHE_PATH = "data/geocode-cache.json"
 NOMINATIM_URL = "https://nominatim.openstreetmap.org/search"
-USER_AGENT = "hyderabad-hygiene-map/1.0 (github.com/ajayjay13/projectbuild1)"
+USER_AGENT = "hyderabad-hygiene-map/1.0 (github.com/YOUR_ORG/YOUR_REPO)"
 
 
 def load_json(path, default):
@@ -33,6 +33,30 @@ def save_json(path, obj):
     with open(path, "w", encoding="utf-8") as f:
         json.dump(obj, f, ensure_ascii=False, indent=2)
         f.write("\n")
+
+
+def extract_score_percent(raw: str) -> int | None:
+    """
+    Pulls a percentage out of flexible formats like '106/114 Marks (93%)',
+    '93%', '93', or 'x/y' fraction-only entries. Returns None if nothing
+    numeric can be recovered (used for legend color, not display).
+    """
+    if not raw:
+        return None
+    m = re.search(r"\((\d{1,3})\s*%\)", raw)  # "(93%)"
+    if not m:
+        m = re.search(r"(\d{1,3})\s*%", raw)  # "93%" anywhere
+    if not m:
+        m = re.search(r"^\s*(\d{1,3})\s*$", raw)  # bare "93"
+    if m:
+        val = int(m.group(1))
+        return val if 0 <= val <= 100 else None
+    m = re.search(r"(\d+(?:\.\d+)?)\s*/\s*(\d+(?:\.\d+)?)", raw)  # "106/114" fraction
+    if m:
+        num, denom = float(m.group(1)), float(m.group(2))
+        if denom > 0:
+            return round(num / denom * 100)
+    return None
 
 
 def parse_issue_body(body: str) -> dict:
@@ -161,11 +185,8 @@ def main():
     kitchen_id = slugify(primary_name)
     inspection = {
         "date": fields.get("Inspection date", ""),
-        "score_percent": (
-            int(fields["Hygiene score (%)"])
-            if fields.get("Hygiene score (%)", "").strip().isdigit()
-            else None
-        ),
+        "score_raw": fields.get("Hygiene score", "").strip() or None,
+        "score_percent": extract_score_percent(fields.get("Hygiene score", "")),
         "good_practices": [l.strip("- ").strip() for l in fields.get("Good practices observed", "").splitlines() if l.strip()],
         "violations": [l.strip("- ").strip() for l in fields.get("Violations / observations", "").splitlines() if l.strip()],
         "action_taken": fields.get("Action taken", ""),
@@ -178,6 +199,8 @@ def main():
     )
     if existing:
         existing["properties"]["inspections"].append(inspection)
+        if maps_url and not existing["properties"].get("google_maps_url"):
+            existing["properties"]["google_maps_url"] = maps_url
         brands_raw = fields.get("Ordering-app brand name(s)", "")
         if brands_raw:
             existing_names = {b["name"] for b in existing["properties"]["brands"]}
@@ -195,6 +218,7 @@ def main():
                 "brands": parse_brands(fields.get("Ordering-app brand name(s)", "")) or [{"name": primary_name, "platform": "dine-in"}],
                 "address": address,
                 "area": address.split(",")[-1].strip() if "," in address else address,
+                "google_maps_url": maps_url or None,
                 "inspections": [inspection],
             },
         })

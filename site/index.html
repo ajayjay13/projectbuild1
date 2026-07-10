@@ -59,7 +59,7 @@ function popupHTML(props) {
   const good = latest.good_practices.map(g => `<li>${g}</li>`).join('') || '<li>None recorded</li>';
   const bad = latest.violations.map(v => `<li>${v}</li>`).join('') || '<li>None recorded</li>';
   const media = latest.media_urls.map(u => `<a href="${u}" target="_blank">media</a>`).join(', ');
-  const score = latest.score_percent !== null ? `${latest.score_percent}%` : 'not published';
+  const score = latest.score_raw || (latest.score_percent !== null ? `${latest.score_percent}%` : 'not published');
   return `
     <strong>${props.primary_name}</strong><br>
     ${props.kitchen_type === 'cloud_kitchen' ? '<em>Cloud kitchen — brands: ' + brands + '</em><br>' : ''}
@@ -69,6 +69,7 @@ function popupHTML(props) {
     <div><b>Violations</b><ul>${bad}</ul></div>
     <div>Action: ${latest.action_taken || 'none recorded'}</div>
     <div>Source: <a href="${latest.source_url}" target="_blank">CMC post</a> ${media ? '· ' + media : ''}</div>
+    ${props.google_maps_url ? `<div><a href="${props.google_maps_url}" target="_blank">View on Google Maps</a></div>` : ''}
   `;
 }
 

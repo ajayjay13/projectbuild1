@@ -3,28 +3,21 @@
   "features": [
     {
       "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          78.3428,
-          17.4956
-        ]
-      },
+      "geometry": { "type": "Point", "coordinates": [78.3428, 17.4956] },
       "properties": {
         "id": "kitchen-001",
         "kitchen_type": "dedicated",
         "primary_name": "Am Aha Restaurant",
         "brands": [
-          {
-            "name": "Am Aha Restaurant",
-            "platform": "dine-in"
-          }
+          { "name": "Am Aha Restaurant", "platform": "dine-in" }
         ],
         "address": "Infinity Mall, Madinaguda, Hyderabad",
         "area": "Madinaguda",
+        "google_maps_url": "https://maps.app.goo.gl/exampleAmAha",
         "inspections": [
           {
             "date": "2026-07-04",
+            "score_raw": "106/114 Marks (88%)",
             "score_percent": 88,
             "good_practices": [
               "No visible pest infestation",
@@ -42,28 +35,20 @@
     },
     {
       "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          78.3915,
-          17.4874
-        ]
-      },
+      "geometry": { "type": "Point", "coordinates": [78.3915, 17.4874] },
       "properties": {
         "id": "kitchen-002",
         "kitchen_type": "cloud_kitchen",
         "primary_name": "Reddy Catering Services",
         "brands": [
-          {
-            "name": "Shree Dwaraka Grand",
-            "platform": "Zomato"
-          }
+          { "name": "Shree Dwaraka Grand", "platform": "Zomato" }
         ],
         "address": "Bagh Ameer, Kukatpally, Hyderabad",
         "area": "Kukatpally",
         "inspections": [
           {
             "date": "2026-07-08",
+            "score_raw": "47/114 Marks (41%)",
             "score_percent": 41,
             "good_practices": [],
             "violations": [
@@ -76,57 +61,6 @@
             "source_url": "https://x.com/CMC_Offcl/status/2075383747386716505",
             "media_urls": [
               "https://x.com/CMC_Offcl/status/2075383747386716505/photo/1"
-            ]
-          }
-        ]
-      }
-    },
-    {
-      "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          78.3658151,
-          17.4009863
-        ]
-      },
-      "properties": {
-        "id": "burger-king",
-        "kitchen_type": "dedicated",
-        "primary_name": "Burger King",
-        "brands": [
-          {
-            "name": "Zomato",
-            "platform": "unknown"
-          },
-          {
-            "name": "Swiggy",
-            "platform": "unknown"
-          }
-        ],
-        "address": "Puppalaguda",
-        "area": "Puppalaguda",
-        "inspections": [
-          {
-            "date": "09.07.2026",
-            "score_percent": null,
-            "good_practices": [
-              "✅ Good Practices",
-              "• No visible pest infestation; pest control records available",
-              "• Medical fitness certificates of food handlers and water testing reports were available",
-              "• Cooking oil quality monitored regularly through TPC testing",
-              "• Food handlers maintained good personal hygiene"
-            ],
-            "violations": [
-              "⚠️ Key Observations",
-              "• Oil leakage observed from kitchen equipment",
-              "• Crates used for storage were not cleaned properly",
-              "• Food testing reports and packaging records were not available"
-            ],
-            "action_taken": "🛠️ Action Taken • Improvement Notice will be issued, and the Food Business Operator (FBO) has been instructed to rectify the identified deficiencies and ensure compliance with food safety standards.",
-            "source_url": "https://x.com/CMC_Offcl/status/2075230699578155153?s=20",
-            "media_urls": [
-              "https://x.com/CMC_Offcl/status/2075230699578155153?s=20"
             ]
           }
         ]

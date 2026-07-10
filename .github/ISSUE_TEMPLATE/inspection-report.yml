@@ -57,8 +57,8 @@ body:
   - type: input
     id: score
     attributes:
-      label: Hygiene score (%)
-      description: Leave blank if CMC didn't publish a numeric score
+      label: Hygiene score
+      description: 'As shown in the post — any format works, e.g. "106/114 Marks (93%)", "93%", or just "93". Leave blank if CMC didn''t publish one.'
     validations:
       required: false
 
