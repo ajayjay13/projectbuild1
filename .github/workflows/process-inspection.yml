@@ -27,7 +27,8 @@ jobs:
         run: |
           git config user.name "hygiene-map-bot"
           git config user.email "actions@github.com"
-          git add data/inspections.geojson data/geocode-cache.json
+          git add data/inspections.geojson
+          [ -f data/geocode-cache.json ] && git add data/geocode-cache.json
           git diff --quiet --cached || git commit -m "Add inspection: ${{ github.event.issue.title }}"
           git push
 

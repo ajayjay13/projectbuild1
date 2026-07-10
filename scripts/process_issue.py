@@ -153,7 +153,7 @@ def main():
     coords = extract_coords_from_maps_url(maps_url)
     if coords is None:
         coords = geocode(address, cache)
-        save_json(CACHE_PATH, cache)
+    save_json(CACHE_PATH, cache)
     if coords is None:
         print("::error::Could not determine coordinates from Maps link or address, skipping. Add lat/lon manually.")
         sys.exit(1)
