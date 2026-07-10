@@ -19,7 +19,7 @@ import urllib.request
 DATA_PATH = "data/inspections.geojson"
 CACHE_PATH = "data/geocode-cache.json"
 NOMINATIM_URL = "https://nominatim.openstreetmap.org/search"
-USER_AGENT = "github.com/ajayjay13/projectbuild1.git"
+USER_AGENT = "hyderabad-hygiene-map/1.0 (github.com/ajayjay13/projectbuild1)"
 
 
 def load_json(path, default):
