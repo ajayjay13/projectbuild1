@@ -19,7 +19,7 @@ import urllib.request
 DATA_PATH = "data/inspections.geojson"
 CACHE_PATH = "data/geocode-cache.json"
 NOMINATIM_URL = "https://nominatim.openstreetmap.org/search"
-USER_AGENT = "hyderabad-hygiene-map/1.0 (github.com/YOUR_ORG/YOUR_REPO)"
+USER_AGENT = "hyderabad-hygiene-map/1.0 (github.com/ajayjay13/projectbuild1.git)"
 
 
 def load_json(path, default):
@@ -142,6 +142,58 @@ def geocode(address: str, cache: dict) -> tuple[float, float] | None:
     return (lon, lat)
 
 
+def haversine_meters(c1: tuple[float, float], c2: tuple[float, float]) -> float:
+    """c1, c2 are (lon, lat) pairs. Returns great-circle distance in meters."""
+    import math
+    lon1, lat1 = c1
+    lon2, lat2 = c2
+    r = 6371000  # Earth radius in meters
+    p1, p2 = math.radians(lat1), math.radians(lat2)
+    dphi = math.radians(lat2 - lat1)
+    dlambda = math.radians(lon2 - lon1)
+    a = math.sin(dphi / 2) ** 2 + math.cos(p1) * math.cos(p2) * math.sin(dlambda / 2) ** 2
+    return 2 * r * math.asin(math.sqrt(a))
+
+
+SAME_KITCHEN_RADIUS_METERS = 60  # submissions within this distance AND a similar name are treated as the same kitchen
+NAME_SIMILARITY_THRESHOLD = 0.6  # 0-1, difflib ratio; handles typos/variants of the same name
+
+
+def name_similarity(a: str, b: str) -> float:
+    import difflib
+    return difflib.SequenceMatcher(None, a.lower().strip(), b.lower().strip()).ratio()
+
+
+def find_matching_kitchen(geo: dict, coords: tuple[float, float], primary_name: str):
+    """
+    Finds an existing feature that is both within SAME_KITCHEN_RADIUS_METERS
+    of coords AND has a similar name. Proximity alone is not enough — two
+    different restaurants in the same building/food court (e.g. KFC and
+    Burger King sharing a mall) must NOT merge into one pin.
+    """
+    best, best_dist = None, None
+    for f in geo["features"]:
+        dist = haversine_meters(coords, tuple(f["geometry"]["coordinates"]))
+        if dist > SAME_KITCHEN_RADIUS_METERS:
+            continue
+        if name_similarity(primary_name, f["properties"]["primary_name"]) < NAME_SIMILARITY_THRESHOLD:
+            continue  # close by, but a different business — don't merge
+        if best_dist is None or dist < best_dist:
+            best, best_dist = f, dist
+    return best
+
+
+def unique_id(geo: dict, base_slug: str) -> str:
+    """Appends -2, -3, ... if base_slug is already used by a different (non-matching) kitchen."""
+    existing_ids = {f["properties"]["id"] for f in geo["features"]}
+    if base_slug not in existing_ids:
+        return base_slug
+    n = 2
+    while f"{base_slug}-{n}" in existing_ids:
+        n += 1
+    return f"{base_slug}-{n}"
+
+
 def slugify(name: str) -> str:
     return re.sub(r"[^a-z0-9]+", "-", name.lower()).strip("-")
 
@@ -182,7 +234,6 @@ def main():
         print("::error::Could not determine coordinates from Maps link or address, skipping. Add lat/lon manually.")
         sys.exit(1)
 
-    kitchen_id = slugify(primary_name)
     inspection = {
         "date": fields.get("Inspection date", ""),
         "score_raw": fields.get("Hygiene score", "").strip() or None,
@@ -194,9 +245,7 @@ def main():
         "media_urls": [u.strip() for u in fields.get("Photo/video URLs", "").split(",") if u.strip()],
     }
 
-    existing = next(
-        (f for f in geo["features"] if f["properties"]["id"] == kitchen_id), None
-    )
+    existing = find_matching_kitchen(geo, coords, primary_name)
     if existing:
         existing["properties"]["inspections"].append(inspection)
         if maps_url and not existing["properties"].get("google_maps_url"):
@@ -208,6 +257,7 @@ def main():
                 if b["name"] not in existing_names:
                     existing["properties"]["brands"].append(b)
     else:
+        kitchen_id = unique_id(geo, slugify(primary_name))
         geo["features"].append({
             "type": "Feature",
             "geometry": {"type": "Point", "coordinates": list(coords)},
@@ -224,7 +274,7 @@ def main():
         })
 
     save_json(DATA_PATH, geo)
-    print(f"Merged inspection for '{primary_name}' ({kitchen_id})")
+    print(f"Merged inspection for '{primary_name}'")
 
 
 if __name__ == "__main__":
